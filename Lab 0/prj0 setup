@@ -1,0 +1,94 @@
+mkdir lab0
+cd lab0
+
+/*
+ *   这部分为最开始的创建Ubuntu原始
+ *   版本的内容
+ *
+ *
+*/
+mkdir data_volume
+cd data_volume
+touch Dockerfile
+
+docker build -t data-volume .
+//编译运行当前文件夹. 下的dockerfile，创建镜像image，命名为data-volume
+//此时查docker images会发现data-volume已经有了
+
+docker run -it -v /data --name data data-volume2 bash
+//从data-volume这个镜像去创建一个container，
+//将这个container命名为data
+//因为container的本质是运行程序
+//所以此时container运行bash
+//创建一个volume卷，该卷就是后面的共享文件
+//可以创建多个-v， 此处就创建一个
+//把该卷命名为/data
+//如果此时从bash里运行ls，就能看到有/data这个文件夹了
+//根据dockerfile，这个文件夹里打开就有string.txt这个文件
+
+/data# cat string.txt
+//该命令会得到string.txt的文本内容
+
+exit
+
+/*
+ *   这部分为最开始的创建server
+ *   版本的内容
+ *
+ *
+*/
+
+返回根目录后
+mkdir server
+cd server
+touch Dockerfile
+
+docker build -t server .
+//给镜像取名叫server
+
+docker run -it --name server --volumes-from data server bash
+//同理第一部分，但是这里因为要access共享的container
+//所以不用自己单独建立一个卷
+//该命令指，运行server这个镜像去创建一个container
+//给这个container命名为server
+//然后从data这个container去读取volumes
+//这里注意，data是指整个container而不是/data这一个volume也不是镜像
+//所以如果有多个volumes的话，本质上都会被share
+
+ls命令后可看到有data这个文件夹了，然后进去可找到string.txt
+
+/*
+ *   这部分为最开始的创建client
+ *   版本的内容
+ *
+ *
+*/
+
+同理client
+mkdir client
+cd client
+touch Dockerfile
+
+docker build -t client .
+docker run -it --name client --volumes-from data client bash
+
+ifconfig可以读到ip地址，ipclient
+
+另外开一个docker，去start server
+docker start server
+//此时用docker ps -a
+//可以查到，client和server要同时status是开启状态
+
+docker exec -it server bash
+ifconfig 读到ipserver
+
+互相ping就行
+
+
+
+
+
+
+
+
+
